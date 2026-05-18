@@ -52,6 +52,8 @@ For CD, add a deploy job after CI succeeds. Typical options:
 - SSH into a VM and run `docker compose pull && docker compose up -d`.
 - Deploy to Azure Container Apps using `.github/workflows/deploy-azure.yml`.
 - Deploy to Railway using the Railway dashboard or `.github/workflows/deploy-railway.yml`.
+- Deploy the frontend to Vercel and keep backend/Postgres on Railway.
 
 See `AZURE_DEPLOYMENT.md` for the Azure Container Apps deployment path.
 See `RAILWAY_DEPLOYMENT.md` for the Railway deployment path.
+See `VERCEL_DEPLOYMENT.md` for the Vercel frontend deployment path.

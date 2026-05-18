@@ -4,7 +4,7 @@ Railway is a good fit for this project because it can deploy each Docker service
 
 ## Services
 
-Create three Railway services:
+Create two Railway services:
 
 1. `smart-healthcare-db`
    - Add Railway PostgreSQL.
@@ -16,11 +16,7 @@ Create three Railway services:
    - Public networking: enabled
    - Health check path: `/health`
 
-3. `smart-healthcare-frontend`
-   - Source: GitHub repo `Bismasaleem01/cc`
-   - Root directory: `frontend/smart_healthcare`
-   - Dockerfile: `frontend/smart_healthcare/Dockerfile`
-   - Public networking: enabled
+Deploy the frontend separately on Vercel. See `VERCEL_DEPLOYMENT.md`.
 
 ## Backend Variables
 
@@ -39,17 +35,15 @@ SUPABASE_STORAGE_BUCKET=healthcare-files
 
 Railway injects `PORT` automatically, so do not hardcode it.
 
-## Frontend Variable
+## Frontend Variable on Vercel
 
-The frontend API URL is compiled into the Flutter web build.
-
-After the backend service is deployed and Railway gives you a backend URL, set this variable on the frontend service:
+After the backend service is deployed and Railway gives you a backend URL, set this variable on the Vercel frontend project:
 
 ```text
 API_BASE_URL=https://your-backend-service.up.railway.app
 ```
 
-Then redeploy the frontend service.
+Then redeploy the Vercel frontend.
 
 ## Important
 
@@ -67,7 +61,6 @@ If you prefer GitHub Actions deployment, add these GitHub secrets:
 ```text
 RAILWAY_TOKEN
 RAILWAY_BACKEND_SERVICE
-RAILWAY_FRONTEND_SERVICE
 ```
 
-Then run the `Deploy to Railway` workflow manually from GitHub Actions.
+Then run the `Deploy to Railway` workflow manually from GitHub Actions for backend deployment.
