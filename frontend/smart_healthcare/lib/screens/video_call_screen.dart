@@ -28,7 +28,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   WebSocketChannel? _channel;
   bool _inCall = false;
   bool _isStarting = false;
-  bool _isReady = false;
   String _role = 'patient';
   final List<Map<String, dynamic>> _pendingSignals = [];
   final List<Map<String, dynamic>> _pendingCandidates = [];
@@ -41,7 +40,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   void initState() {
     super.initState();
-    _isReady = true;
     _enterRoom();
   }
 
@@ -201,14 +199,44 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       );
     };
 
+    _peerConnection!.onConnectionState = (RTCPeerConnectionState state) {
+      if (!mounted) return;
+      if (state == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+        setState(() => _statusMessage = 'Connected');
+      } else if (state ==
+          RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
+        setState(() {
+          _statusMessage =
+              'Video connection failed. End the call and join again.';
+        });
+      } else if (state ==
+          RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) {
+        setState(() {
+          _statusMessage = 'Connection interrupted. Waiting to reconnect...';
+        });
+      }
+    };
+
+    _peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {
+      if (!mounted) return;
+      if (state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
+        setState(() {
+          _statusMessage =
+              'Network could not connect the video streams. Try both users on the same Wi-Fi or join again.';
+        });
+      }
+    };
+
     _peerConnection!.onAddStream = (MediaStream stream) {
       _remoteRenderer.srcObject = stream;
       for (final track in stream.getAudioTracks()) {
         track.enabled = true;
       }
-      setState(() {
-        _statusMessage = 'Connected';
-      });
+      if (mounted) {
+        setState(() {
+          _statusMessage = 'Connected';
+        });
+      }
     };
 
     _peerConnection!.onTrack = (RTCTrackEvent event) {
@@ -217,9 +245,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       for (final track in event.streams.first.getAudioTracks()) {
         track.enabled = true;
       }
-      setState(() {
-        _statusMessage = 'Connected';
-      });
+      if (mounted) {
+        setState(() {
+          _statusMessage = 'Connected';
+        });
+      }
     };
 
     // Add local stream tracks to peer connection
@@ -286,9 +316,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           ).showSnackBar(SnackBar(content: Text(error)));
         }
       }
-      if (_role == 'patient') {
-        await _sendOffer();
-      }
+      if (_role == 'patient' && _remoteReady) await _sendOffer();
 
       setState(() {
         _inCall = true;
@@ -298,7 +326,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
             : 'Waiting for patient video...';
       });
     } catch (e) {
-      print(e.toString());
+      debugPrint(e.toString());
       setState(() {
         _isStarting = false;
         _statusMessage =
@@ -323,6 +351,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     _remoteRenderer.srcObject = null;
     await _peerConnection?.close();
     _peerConnection = null;
+    _remoteReady = false;
+    _hasRemoteDescription = false;
+    _pendingSignals.clear();
+    _pendingCandidates.clear();
     if (widget.appointmentId != null) {
       await VideoService.clearWaitingCall(widget.appointmentId!);
     }
@@ -364,7 +396,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
             child: Container(
               color: Colors.black,
               child: _remoteRenderer.srcObject != null
-                  ? RTCVideoView(_remoteRenderer)
+                  ? RTCVideoView(
+                      _remoteRenderer,
+                      objectFit:
+                          RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                    )
                   : Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
@@ -412,7 +448,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                   ? const Center(
                       child: Icon(Icons.videocam_off, color: Colors.white70),
                     )
-                  : RTCVideoView(_localRenderer, mirror: true),
+                  : RTCVideoView(
+                      _localRenderer,
+                      mirror: true,
+                      objectFit:
+                          RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                    ),
             ),
           ),
           Positioned(

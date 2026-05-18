@@ -34,15 +34,16 @@ class ConnectionManager:
             self.active_connections[room_id].remove(websocket)
         if room_id in self.active_connections and not self.active_connections[room_id]:
             del self.active_connections[room_id]
+            self.last_messages.pop(room_id, None)
 
     async def broadcast(self, room_id: str, sender: WebSocket, message: dict):
         """
         Broadcast signaling messages to other clients in the same appointment room.
         """
-        if message.get("type") in ["ready", "offer"]:
-            history = self.last_messages.setdefault(room_id, [])
-            history.append(message)
-            self.last_messages[room_id] = history[-4:]
+        if message.get("type") == "call-ended":
+            self.last_messages.pop(room_id, None)
+        elif message.get("type") == "ready":
+            self.last_messages[room_id] = [message]
         for connection in self.active_connections.get(room_id, []):
             if connection is not sender:
                 await connection.send_json(message)
