@@ -50,4 +50,6 @@ For CD, add a deploy job after CI succeeds. Typical options:
 
 - Push images to GitHub Container Registry.
 - SSH into a VM and run `docker compose pull && docker compose up -d`.
-- Deploy the backend image to Render/Fly.io/Railway and the frontend image to any static/container host.
+- Deploy to Azure Container Apps using `.github/workflows/deploy-azure.yml`.
+
+See `AZURE_DEPLOYMENT.md` for the Azure Container Apps deployment path.
