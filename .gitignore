@@ -1,0 +1,35 @@
+# Secrets and local environment
+.env
+*.env
+!*.env.example
+backend/.env
+certs/
+*.pem
+*.key
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.log
+
+# Flutter/Dart
+.pub-cache/
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+
+# IDE and OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Runtime logs
+*.out.log
+*.err.log

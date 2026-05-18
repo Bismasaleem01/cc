@@ -1,0 +1,11 @@
+.dart_tool/
+build/
+.pub-cache/
+android/
+ios/
+linux/
+macos/
+windows/
+*.log
+flutter_web.out.log
+flutter_web.err.log

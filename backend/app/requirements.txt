@@ -1,0 +1,11 @@
+fastapi==0.111.1
+uvicorn[standard]==0.23.1
+pydantic==2.5.1
+python-jose==3.3.0          # For JWT authentication
+passlib[bcrypt]==1.7.4      # For password hashing
+psycopg2-binary==2.9.9      # PostgreSQL database driver
+requests==2.32.0            # For calling AI API
+python-dotenv==1.0.0        # Load .env environment variables
+SQLAlchemy==2.0.22          # ORM for database
+google-generativeai==0.8.3  # Gemini chatbot integration
+python-multipart==0.0.9     # File uploads for medical records
